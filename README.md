@@ -2,8 +2,6 @@
 
 🍽️ **A modern, responsive website for TasteWithChefT - Authentic Nigerian cuisine and catering services in Atlanta & Gwinnett County.**
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/your-badge-id/deploy-status)](https://app.netlify.com/sites/your-site-name/deploys)
-
 ## 🌟 About
 
 TasteWithChefT brings authentic Nigerian flavors and global cuisine to Atlanta and Gwinnett County. This website showcases Chef T's culinary expertise, featuring:
@@ -15,7 +13,7 @@ TasteWithChefT brings authentic Nigerian flavors and global cuisine to Atlanta a
 
 ## 🚀 Live Demo
 
-🔗 **[Visit TasteWithChefT Website](https://your-netlify-url.netlify.app)**
+🔗 **[Visit TasteWithChefT Website](https://tastewithcheft.netlify.app)**
 
 ## ✨ Features
 
@@ -128,43 +126,10 @@ This project is configured for **Netlify** deployment:
 
 **Prince Uwagboe**
 - 🌐 Portfolio: [prince-uwagboe.netlify.app](https://prince-uwagboe.netlify.app/)
-- 💼 LinkedIn: [Connect with Prince](https://linkedin.com/in/prince-uwagboe)
-- 📧 Contact: [prince@example.com](mailto:prince@example.com)
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-**Free for Commercial and Personal Use**
-- ✅ Use for any purpose
-- ✅ Modify and distribute
-- ✅ Include in your projects
-- ❌ No warranty provided
-
-## 🤝 Contributing
-
-While this is primarily a business website, feedback and suggestions are welcome:
-
-1. Open an issue for bugs or suggestions
-2. Fork the repository for major changes
-3. Submit pull requests with detailed descriptions
-
-## 🙏 Acknowledgments
-
-- **Chef T**: For trusting us with her culinary vision
-- **Nigerian Culinary Heritage**: Inspiration for authentic recipes
-- **Atlanta Community**: Supporting local Nigerian cuisine
-- **Open Source Community**: Tools and resources that made this possible
-
-## 📊 Project Stats
-
-- **Project Type**: Business Website / Portfolio Project
-- **Development Time**: 2+ weeks
-- **Lines of Code**: 1,600+
-- **Responsive Breakpoints**: 3 (Mobile, Tablet, Desktop)
-- **Menu Items**: 50+ authentic dishes
-
----
 
 **⭐ Star this repository if it helped you or if you enjoy Nigerian cuisine!**
 
