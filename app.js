@@ -202,47 +202,64 @@ function showPhoneConfirmation() {
  * Initialize mobile menu functionality
  */
 function initMobileMenu() {
-    // Create mobile menu button if it doesn't exist
-    if (window.innerWidth <= 768) {
-        createMobileMenuButton();
-    }
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
     
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth <= 768) {
-            createMobileMenuButton();
-        } else {
-            removeMobileMenuButton();
-        }
-    });
+    if (mobileToggle && navLinks) {
+        mobileToggle.addEventListener('click', function() {
+            // Toggle active classes
+            this.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            
+            // Prevent body scroll when menu is open
+            if (navLinks.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close menu when clicking on nav links
+        const navLinkItems = navLinks.querySelectorAll('.nav-link, .nav-cta');
+        navLinkItems.forEach(link => {
+            link.addEventListener('click', function() {
+                closeMobileMenu();
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!mobileToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                closeMobileMenu();
+            }
+        });
+        
+        // Close menu on window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeMobileMenu();
+            }
+        });
+    }
 }
 
 /**
- * Create mobile menu button and functionality
+ * Close mobile menu
  */
-function createMobileMenuButton() {
-    const navbar = document.querySelector('.navbar .container');
-    let mobileButton = document.querySelector('.mobile-menu-btn');
+function closeMobileMenu() {
+    const mobileToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
     
-    if (!mobileButton) {
-        mobileButton = document.createElement('button');
-        mobileButton.className = 'mobile-menu-btn';
-        mobileButton.innerHTML = '☰';
-        mobileButton.style.cssText = `
-            background: none;
-            border: none;
-            font-size: var(--font-size-xl);
-            color: var(--color-text);
-            cursor: pointer;
-            padding: var(--space-8);
-            display: block;
-        `;
-        
-        navbar.appendChild(mobileButton);
-        
-        mobileButton.addEventListener('click', toggleMobileMenu);
+    if (mobileToggle && navLinks) {
+        mobileToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+        document.body.style.overflow = '';
     }
 }
+
+/**
+ * Initialize animations for page elements
+ */
 
 /**
  * Remove mobile menu button
@@ -457,17 +474,32 @@ function initMenuTabs() {
             // Add active class to clicked tab
             this.classList.add('active');
             
-            // Show corresponding category
+            // Show corresponding category immediately for mobile
             const targetElement = document.getElementById(targetCategory);
             if (targetElement) {
                 targetElement.classList.add('active');
+                
+                // Force visibility immediately on mobile
+                if (window.innerWidth <= 768) {
+                    targetElement.style.display = 'block';
+                    targetElement.style.opacity = '1';
+                    targetElement.style.visibility = 'visible';
+                    
+                    // Scroll to menu section on mobile for better UX
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'nearest' 
+                        });
+                    }, 100);
+                } else {
+                    // Desktop smooth transition
+                    targetElement.style.opacity = '0';
+                    setTimeout(() => {
+                        targetElement.style.opacity = '1';
+                    }, 50);
+                }
             }
-            
-            // Add smooth transition effect
-            targetElement.style.opacity = '0';
-            setTimeout(() => {
-                targetElement.style.opacity = '1';
-            }, 50);
         });
     });
 }
