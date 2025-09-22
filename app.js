@@ -205,11 +205,21 @@ function initMobileMenu() {
     const mobileToggle = document.querySelector('.mobile-menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     
+    console.log('Mobile toggle found:', mobileToggle);
+    console.log('Nav links found:', navLinks);
+    
     if (mobileToggle && navLinks) {
-        mobileToggle.addEventListener('click', function() {
+        mobileToggle.addEventListener('click', function(e) {
+            console.log('Hamburger menu clicked!');
+            e.preventDefault();
+            e.stopPropagation();
+            
             // Toggle active classes
             this.classList.toggle('active');
             navLinks.classList.toggle('active');
+            
+            console.log('Menu toggle active:', this.classList.contains('active'));
+            console.log('Nav links active:', navLinks.classList.contains('active'));
             
             // Prevent body scroll when menu is open
             if (navLinks.classList.contains('active')) {
@@ -240,6 +250,8 @@ function initMobileMenu() {
                 closeMobileMenu();
             }
         });
+    } else {
+        console.log('Mobile menu elements not found!');
     }
 }
 
