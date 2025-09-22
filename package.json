@@ -1,0 +1,81 @@
+{
+  "name": "taste-with-cheft",
+  "version": "1.0.0",
+  "description": "Authentic Nigerian catering website for TasteWithChefT - Serving Atlanta & Gwinnett County with traditional Nigerian cuisine and global fusion dishes",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "serve": "python -m http.server 8080",
+    "dev": "python -m http.server 8080",
+    "preview": "python -m http.server 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrPrince419/taste-with-chefT.git"
+  },
+  "keywords": [
+    "nigerian-food",
+    "catering",
+    "atlanta",
+    "gwinnett",
+    "restaurant",
+    "african-cuisine",
+    "jollof-rice",
+    "meal-prep",
+    "food-delivery",
+    "chef",
+    "authentic",
+    "traditional-recipes",
+    "business-website",
+    "responsive-design",
+    "portfolio-project"
+  ],
+  "author": {
+    "name": "Prince Uwagboe",
+    "email": "prince@example.com",
+    "url": "https://prince-uwagboe.netlify.app/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrPrince419/taste-with-chefT/issues"
+  },
+  "homepage": "https://github.com/MrPrince419/taste-with-chefT#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "devDependencies": {},
+  "dependencies": {},
+  "metadata": {
+    "business": {
+      "name": "TasteWithChefT",
+      "type": "Nigerian Catering Service",
+      "location": "Atlanta & Gwinnett County, Georgia",
+      "phone": "(470) 430-0782",
+      "email": "chefteeeee@gmail.com",
+      "instagram": "@tastewithcheft",
+      "tiktok": "@therealtahty"
+    },
+    "developer": {
+      "name": "Prince Uwagboe",
+      "portfolio": "https://prince-uwagboe.netlify.app/",
+      "role": "Full-Stack Developer"
+    },
+    "project": {
+      "type": "Business Website & Portfolio Project",
+      "features": [
+        "Responsive Design",
+        "Interactive Menu System",
+        "Social Media Integration",
+        "Contact Management",
+        "SEO Optimized"
+      ],
+      "tech_stack": ["HTML5", "CSS3", "Vanilla JavaScript"],
+      "deployment": "Netlify"
+    }
+  }
+}
