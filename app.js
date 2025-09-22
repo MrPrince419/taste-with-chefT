@@ -53,15 +53,17 @@ function initScrollEffects() {
     window.addEventListener('scroll', function() {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
-        // Add enhanced shadow to navbar when scrolling
+        // Add enhanced effects to navbar when scrolling
         if (scrollTop > 50) {
             navbar.style.boxShadow = 'var(--shadow-lg)';
-            navbar.style.background = 'rgba(var(--color-surface), 0.95)';
-            navbar.style.backdropFilter = 'blur(10px)';
+            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+            navbar.style.backdropFilter = 'blur(8px)';
+            navbar.style.borderBottom = '1px solid rgba(236, 72, 153, 0.2)';
         } else {
             navbar.style.boxShadow = 'var(--shadow-sm)';
-            navbar.style.background = 'var(--color-surface)';
-            navbar.style.backdropFilter = 'none';
+            navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+            navbar.style.backdropFilter = 'blur(8px)';
+            navbar.style.borderBottom = '1px solid rgba(236, 72, 153, 0.1)';
         }
         
         // Throttle scroll events for performance
@@ -206,59 +208,41 @@ function initMobileMenu() {
     const navLinks = document.querySelector('.nav-links');
     
     if (!mobileToggle || !navLinks) {
-        console.warn('Mobile menu elements not found');
         return;
     }
     
-    // Main toggle click handler
+    // Simple toggle click handler
     mobileToggle.addEventListener('click', function(e) {
         e.preventDefault();
-        e.stopPropagation();
         
-        const isActive = this.classList.contains('active');
+        // Toggle classes
+        mobileToggle.classList.toggle('active');
+        navLinks.classList.toggle('active');
         
-        if (isActive) {
-            closeMobileMenu();
+        // Handle body scroll
+        if (navLinks.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
         } else {
-            openMobileMenu();
+            document.body.style.overflow = '';
         }
     });
     
-    // Close menu when clicking on nav links
-    const navLinkItems = navLinks.querySelectorAll('.nav-link, .nav-cta');
-    navLinkItems.forEach(link => {
-        link.addEventListener('click', function() {
+    // Close menu when clicking nav links
+    navLinks.addEventListener('click', function(e) {
+        if (e.target.classList.contains('nav-link') || e.target.classList.contains('nav-cta')) {
             closeMobileMenu();
-        });
+        }
     });
     
     // Close menu when clicking outside
     document.addEventListener('click', function(e) {
-        if (!mobileToggle.contains(e.target) && !navLinks.contains(e.target)) {
+        if (window.innerWidth <= 768 && 
+            !mobileToggle.contains(e.target) && 
+            !navLinks.contains(e.target) &&
+            navLinks.classList.contains('active')) {
             closeMobileMenu();
         }
     });
-    
-    // Close menu on window resize
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            closeMobileMenu();
-        }
-    });
-}
-
-/**
- * Open mobile menu
- */
-function openMobileMenu() {
-    const mobileToggle = document.querySelector('.mobile-menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (mobileToggle && navLinks) {
-        mobileToggle.classList.add('active');
-        navLinks.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
 }
 
 /**
@@ -496,6 +480,9 @@ function initMenuTabs() {
             const targetElement = document.getElementById(targetCategory);
             if (targetElement) {
                 targetElement.classList.add('active');
+                
+                // Scroll the target element into view smoothly
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 
                 // Force visibility immediately on mobile
                 if (window.innerWidth <= 768) {
