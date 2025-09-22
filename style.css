@@ -306,11 +306,145 @@ html {
   background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
+  
+  /* Prevent horizontal scrolling and mobile overscroll */
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 body {
   margin: 0;
   padding: 0;
+  
+  /* Prevent horizontal scrolling and mobile overscroll */
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  
+  /* Prevent mobile rubber band effect */
+  overscroll-behavior-x: none;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Ensure body doesn't exceed viewport width */
+  max-width: 100vw;
+  min-height: 100vh;
+}
+
+/* Universal box-sizing and overflow prevention */
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+  
+  /* Prevent any element from causing horizontal overflow */
+  max-width: 100%;
+}
+
+/* Specific container and layout overflow fixes */
+.container,
+.hero,
+.navbar,
+.section,
+.footer {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Image and media overflow prevention */
+img,
+video,
+iframe,
+object,
+embed {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Table overflow prevention */
+table {
+  width: 100%;
+  table-layout: fixed;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+/* Text overflow prevention */
+pre,
+code {
+  overflow-x: auto;
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Form element overflow prevention */
+input,
+textarea,
+select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Grid and flex container fixes */
+.grid,
+.flex,
+[class*="grid"],
+[class*="flex"] {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile-specific overflow fixes */
+@media (max-width: 768px) {
+  /* Extra mobile protections */
+  html,
+  body {
+    overflow-x: hidden !important;
+    position: relative;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Prevent wide elements from breaking layout */
+  * {
+    max-width: 100vw !important;
+  }
+  
+  /* Container width fixes for mobile */
+  .container {
+    padding-left: clamp(1rem, 5vw, 2rem);
+    padding-right: clamp(1rem, 5vw, 2rem);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 100vw;
+  }
+  
+  /* Specific mobile menu fixes */
+  .menu-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .menu-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Text content overflow fixes */
+  .hero-title,
+  .hero-subtitle,
+  .section-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    max-width: 100%;
+  }
 }
 
 *,
