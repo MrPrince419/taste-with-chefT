@@ -2451,10 +2451,12 @@ select.form-control {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: clamp(var(--space-16), 3vw, var(--space-32));
-  max-width: min(1200px, 90vw);
-  margin: 0 auto;
   width: 100%;
+  margin: 0 auto;
   padding: 0 clamp(var(--space-8), 2vw, var(--space-16));
+  /* Remove container constraints to prevent scrollable box behavior */
+  max-width: none;
+  overflow: visible;
 }
 
 .gallery-item {
@@ -2462,6 +2464,9 @@ select.form-control {
   border-radius: 15px;
   overflow: hidden;
   cursor: pointer;
+  /* Ensure natural height flow */
+  height: auto;
+  min-height: auto;
 }
 
 /* Lazy Loading Optimization */
@@ -2700,12 +2705,18 @@ select.form-control {
 @media (max-width: 768px) {
   .gallery {
     padding: 2rem 0;
+    /* Remove any container height constraints */
+    height: auto;
+    overflow: visible;
   }
   
   .gallery-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-16);
     padding: 0 var(--space-12);
+    /* Ensure grid flows naturally */
+    max-width: none;
+    overflow: visible;
   }
   
   .gallery-filters {
@@ -2746,6 +2757,10 @@ select.form-control {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-12);
     padding: 0 var(--space-8);
+    /* Remove any scrollable container behavior */
+    max-width: none;
+    overflow: visible;
+    height: auto;
   }
   
   .gallery-filters {
@@ -2759,8 +2774,16 @@ select.form-control {
     font-size: 11px;
   }
   
+  .gallery-item {
+    /* Allow natural height instead of fixed */
+    height: auto;
+    min-height: 200px;
+  }
+  
   .gallery-item img {
     height: 140px;
+    object-fit: cover;
+    width: 100%;
   }
   
   .gallery-overlay {
