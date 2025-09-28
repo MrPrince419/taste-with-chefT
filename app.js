@@ -6,10 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollEffects();
     initPhoneHandling();
     initAnimations();
-    initMobileMenu();
+    initEnhancedNavigation(); // Enhanced navigation with dropdowns
     initContactInteractions();
     initMenuInteractions();
     initNigerianTheme();
+    initGallery(); // Add gallery initialization
+    initFAQ(); // Add FAQ accordion functionality
 });
 
 /**
@@ -50,20 +52,16 @@ function initScrollEffects() {
     let lastScrollTop = 0;
     let scrollTimer = null;
     
+    if (!navbar) return;
+    
     window.addEventListener('scroll', function() {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         // Add enhanced effects to navbar when scrolling
         if (scrollTop > 50) {
-            navbar.style.boxShadow = 'var(--shadow-lg)';
-            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-            navbar.style.backdropFilter = 'blur(8px)';
-            navbar.style.borderBottom = '1px solid rgba(236, 72, 153, 0.2)';
+            navbar.classList.add('navbar-scrolled');
         } else {
-            navbar.style.boxShadow = 'var(--shadow-sm)';
-            navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-            navbar.style.backdropFilter = 'blur(8px)';
-            navbar.style.borderBottom = '1px solid rgba(236, 72, 153, 0.1)';
+            navbar.classList.remove('navbar-scrolled');
         }
         
         // Throttle scroll events for performance
@@ -201,6 +199,162 @@ function showPhoneConfirmation() {
 }
 
 /**
+ * Initialize enhanced navigation functionality
+ */
+function initEnhancedNavigation() {
+    initDropdownNavigation();
+    initMobileMenu();
+    initMenuCategoryNavigation();
+    initGalleryNavigation();
+}
+
+/**
+ * Initialize dropdown navigation for desktop
+ */
+function initDropdownNavigation() {
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        
+        if (!toggle || !menu) return;
+        
+        // Desktop hover behavior
+        if (window.innerWidth > 768) {
+            dropdown.addEventListener('mouseenter', function() {
+                this.classList.add('active');
+            });
+            
+            dropdown.addEventListener('mouseleave', function(e) {
+                // Check if mouse is leaving to go to the dropdown menu
+                const rect = dropdown.getBoundingClientRect();
+                const menuRect = menu.getBoundingClientRect();
+                
+                // If mouse is moving to dropdown area, don't close
+                if (e.clientY <= menuRect.bottom && e.clientY >= rect.bottom - 5) {
+                    return;
+                }
+                
+                this.classList.remove('active');
+            });
+            
+            // Keep dropdown open when hovering over the menu itself
+            menu.addEventListener('mouseenter', function() {
+                dropdown.classList.add('active');
+            });
+            
+            menu.addEventListener('mouseleave', function() {
+                dropdown.classList.remove('active');
+            });
+        }
+        
+        // Mobile click behavior
+        toggle.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                dropdown.classList.toggle('active');
+                
+                // Close other dropdowns
+                dropdowns.forEach(otherDropdown => {
+                    if (otherDropdown !== dropdown) {
+                        otherDropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        const clickedDropdown = e.target.closest('.nav-dropdown');
+        if (!clickedDropdown) {
+            dropdowns.forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+}
+
+/**
+ * Initialize menu category navigation
+ */
+function initMenuCategoryNavigation() {
+    const menuCategoryLinks = document.querySelectorAll('[data-menu-category]');
+    
+    menuCategoryLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const category = this.getAttribute('data-menu-category');
+            const menuSection = document.getElementById('menu');
+            const menuTab = document.querySelector(`[data-category="${category}"]`);
+            
+            // Scroll to menu section
+            if (menuSection) {
+                const navbar = document.querySelector('.navbar');
+                const navbarHeight = navbar ? navbar.offsetHeight : 0;
+                const targetPosition = menuSection.offsetTop - navbarHeight - 20;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // Activate the corresponding menu tab after scroll
+                setTimeout(() => {
+                    if (menuTab) {
+                        menuTab.click();
+                    }
+                }, 500);
+                
+                // Close mobile menu
+                closeMobileMenu();
+            }
+        });
+    });
+}
+
+/**
+ * Initialize gallery navigation
+ */
+function initGalleryNavigation() {
+    const galleryFilterLinks = document.querySelectorAll('[data-gallery-filter]');
+    
+    galleryFilterLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const filter = this.getAttribute('data-gallery-filter');
+            const gallerySection = document.getElementById('gallery');
+            const galleryFilter = document.querySelector(`[data-filter="${filter}"]`);
+            
+            // Scroll to gallery section
+            if (gallerySection) {
+                const navbar = document.querySelector('.navbar');
+                const navbarHeight = navbar ? navbar.offsetHeight : 0;
+                const targetPosition = gallerySection.offsetTop - navbarHeight - 20;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // Activate the corresponding gallery filter after scroll
+                setTimeout(() => {
+                    if (galleryFilter) {
+                        galleryFilter.click();
+                    }
+                }, 500);
+                
+                // Close mobile menu
+                closeMobileMenu();
+            }
+        });
+    });
+}
+
+/**
  * Initialize mobile menu functionality
  */
 function initMobileMenu() {
@@ -227,19 +381,65 @@ function initMobileMenu() {
         }
     });
     
-    // Close menu when clicking nav links
+    // Close menu when clicking any navigation link (improved)
     navLinks.addEventListener('click', function(e) {
-        if (e.target.classList.contains('nav-link') || e.target.classList.contains('nav-cta')) {
-            closeMobileMenu();
+        const target = e.target;
+        const clickedLink = target.closest('a'); // Find the actual link element
+        
+        // Check if clicked element is a navigation link
+        const isNavLink = clickedLink && (
+            clickedLink.classList.contains('nav-link') ||
+            clickedLink.classList.contains('nav-cta') ||
+            clickedLink.classList.contains('dropdown-item') ||
+            clickedLink.getAttribute('href')?.startsWith('#')
+        );
+        
+        // Don't close for dropdown toggles (unless they have href)
+        const isDropdownToggle = target.classList.contains('dropdown-toggle') || 
+                                 target.closest('.dropdown-toggle');
+        const hasHref = clickedLink && clickedLink.getAttribute('href');
+        
+        // Close menu if it's a navigation link with href or any CTA button
+        if (isNavLink && (hasHref || clickedLink.classList.contains('nav-cta'))) {
+            // Add slight delay to allow smooth scrolling to start
+            setTimeout(() => {
+                closeMobileMenu();
+            }, 100);
         }
     });
     
-    // Close menu when clicking outside
+    // Close menu when clicking outside or on overlay
     document.addEventListener('click', function(e) {
         if (window.innerWidth <= 768 && 
             !mobileToggle.contains(e.target) && 
             !navLinks.contains(e.target) &&
             navLinks.classList.contains('active')) {
+            closeMobileMenu();
+        }
+    });
+    
+    // Also close menu when clicking on the overlay area
+    navLinks.addEventListener('click', function(e) {
+        // If clicking directly on the nav-links container (overlay area), close menu
+        if (e.target === navLinks) {
+            closeMobileMenu();
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            closeMobileMenu();
+            // Reset dropdown states on desktop
+            document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        }
+    });
+    
+    // Close menu with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
             closeMobileMenu();
         }
     });
@@ -464,10 +664,18 @@ function initMenuTabs() {
     const menuTabs = document.querySelectorAll('.menu-tab');
     const menuCategories = document.querySelectorAll('.menu-category');
     
+    if (!menuTabs.length || !menuCategories.length) {
+        console.warn('Menu tabs or categories not found');
+        return;
+    }
+    
     // Add click event listeners to tabs
     menuTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
             const targetCategory = this.getAttribute('data-category');
+            
+            if (!targetCategory) return;
             
             // Remove active class from all tabs and categories
             menuTabs.forEach(t => t.classList.remove('active'));
@@ -476,35 +684,20 @@ function initMenuTabs() {
             // Add active class to clicked tab
             this.classList.add('active');
             
-            // Show corresponding category immediately for mobile
+            // Show corresponding category
             const targetElement = document.getElementById(targetCategory);
             if (targetElement) {
                 targetElement.classList.add('active');
                 
-                // Scroll the target element into view smoothly
-                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                
-                // Force visibility immediately on mobile
-                if (window.innerWidth <= 768) {
-                    targetElement.style.display = 'block';
-                    targetElement.style.opacity = '1';
-                    targetElement.style.visibility = 'visible';
-                    
-                    // Scroll to menu section on mobile for better UX
-                    setTimeout(() => {
-                        targetElement.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'nearest' 
-                        });
-                    }, 100);
-                } else {
-                    // Desktop smooth transition
-                    targetElement.style.opacity = '0';
-                    setTimeout(() => {
-                        targetElement.style.opacity = '1';
-                    }, 50);
-                }
+                // Simple scroll into view
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }, 100);
             }
+
         });
     });
 }
@@ -748,11 +941,176 @@ dynamicStyles.textContent = `
 
 document.head.appendChild(dynamicStyles);
 
+/**
+ * Initialize Gallery functionality
+ */
+function initGallery() {
+    const galleryFilters = document.querySelectorAll('.gallery-filter');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    const modal = document.getElementById('galleryModal');
+    const modalImage = document.querySelector('.modal-image');
+    const modalTitle = document.querySelector('.modal-title');
+    const modalDescription = document.querySelector('.modal-description');
+    const modalClose = document.querySelector('.modal-close');
+    const modalPrev = document.querySelector('.modal-prev');
+    const modalNext = document.querySelector('.modal-next');
+    
+    let currentImageIndex = 0;
+    let filteredImages = Array.from(galleryItems);
+    
+    // Gallery filtering
+    galleryFilters.forEach(filter => {
+        filter.addEventListener('click', function() {
+            const category = this.getAttribute('data-filter');
+            
+            // Update active filter
+            galleryFilters.forEach(f => f.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter gallery items
+            filteredImages = [];
+            galleryItems.forEach((item, index) => {
+                const itemCategory = item.getAttribute('data-category');
+                
+                if (category === 'all' || itemCategory === category) {
+                    item.classList.remove('hidden');
+                    item.classList.add('visible');
+                    filteredImages.push(item);
+                } else {
+                    item.classList.add('hidden');
+                    item.classList.remove('visible');
+                }
+            });
+        });
+    });
+    
+    // Modal functionality
+    galleryItems.forEach((item, index) => {
+        item.addEventListener('click', function() {
+            const img = this.querySelector('img');
+            const overlay = this.querySelector('.gallery-overlay');
+            const title = overlay.querySelector('h3').textContent;
+            const description = overlay.querySelector('p').textContent;
+            
+            // Set modal content
+            modalImage.src = img.src;
+            modalImage.alt = img.alt;
+            modalTitle.textContent = title;
+            modalDescription.textContent = description;
+            
+            // Find current index in filtered images
+            currentImageIndex = filteredImages.indexOf(this);
+            
+            // Show modal
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    });
+    
+    // Close modal
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    modalClose.addEventListener('click', closeModal);
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Navigation in modal
+    function showImage(index) {
+        if (index < 0) index = filteredImages.length - 1;
+        if (index >= filteredImages.length) index = 0;
+        
+        currentImageIndex = index;
+        const item = filteredImages[index];
+        const img = item.querySelector('img');
+        const overlay = item.querySelector('.gallery-overlay');
+        const title = overlay.querySelector('h3').textContent;
+        const description = overlay.querySelector('p').textContent;
+        
+        modalImage.src = img.src;
+        modalImage.alt = img.alt;
+        modalTitle.textContent = title;
+        modalDescription.textContent = description;
+    }
+    
+    modalPrev.addEventListener('click', function() {
+        showImage(currentImageIndex - 1);
+    });
+    
+    modalNext.addEventListener('click', function() {
+        showImage(currentImageIndex + 1);
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (modal.classList.contains('active')) {
+            switch(e.key) {
+                case 'Escape':
+                    closeModal();
+                    break;
+                case 'ArrowLeft':
+                    showImage(currentImageIndex - 1);
+                    break;
+                case 'ArrowRight':
+                    showImage(currentImageIndex + 1);
+                    break;
+            }
+        }
+    });
+    
+    // Touch/swipe support for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    modal.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    });
+    
+    modal.addEventListener('touchend', function(e) {
+        if (!touchStartX || !touchStartY) return;
+        
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        
+        const diffX = touchStartX - touchEndX;
+        const diffY = touchStartY - touchEndY;
+        
+        // Only handle horizontal swipes that are larger than vertical ones
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            if (diffX > 0) {
+                // Swipe left - next image
+                showImage(currentImageIndex + 1);
+            } else {
+                // Swipe right - previous image
+                showImage(currentImageIndex - 1);
+            }
+        }
+        
+        touchStartX = 0;
+        touchStartY = 0;
+    });
+    
+    // Initialize with all items visible
+    galleryItems.forEach(item => {
+        item.classList.add('visible');
+    });
+}
+
 // Initialize all functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initButtonEffects();
     initQRCode();
     initKeyboardShortcuts();
+    initGallery(); // Add gallery initialization
+    initOrderForm(); // Initialize order form functionality
+    initTestimonials(); // Initialize testimonials animations
     
     // Console welcome message
     console.log('🇳🇬 Welcome to TasteWithChefT! 🇳🇬');
@@ -761,4 +1119,666 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('- Ctrl+M: Jump to menu');
     console.log('- Ctrl+K: Jump to contact');
     console.log('- Type "NDEWO": Special greeting');
+    console.log('Gallery shortcuts:');
+    console.log('- Arrow keys: Navigate images in modal');
+    console.log('- Escape: Close modal');
+    console.log('- Swipe: Navigate on mobile');
+    console.log('🍽️ Order form ready for submissions!');
 });
+
+/**
+ * Dynamic Order Form System
+ */
+class OrderFormManager {
+    constructor() {
+        this.selectedItems = [];
+        this.orderType = 'individual';
+        this.initializeElements();
+        this.attachEventListeners();
+        this.setMinimumDates();
+        this.updateUI();
+    }
+
+    initializeElements() {
+        this.form = document.getElementById('orderForm');
+        this.dishSelect = document.getElementById('dishSelect');
+        this.sizeSelect = document.getElementById('sizeSelect');
+        this.addItemBtn = document.getElementById('addItemBtn');
+        this.itemsList = document.getElementById('itemsList');
+        this.itemCount = document.getElementById('itemCount');
+        this.submitBtn = document.getElementById('submitOrderBtn');
+        this.orderSummary = document.getElementById('orderSummaryText');
+        this.eventDetailsSection = document.getElementById('eventDetailsSection');
+        this.orderSectionTitle = document.getElementById('orderSectionTitle');
+        this.selectedItemsData = document.getElementById('selectedItemsData');
+        this.orderTypeData = document.getElementById('orderTypeData');
+    }
+
+    attachEventListeners() {
+        // Order type tabs
+        document.querySelectorAll('.order-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => this.handleOrderTypeChange(e));
+        });
+
+        // Dish and size selection
+        this.dishSelect.addEventListener('change', () => this.validateAddButton());
+        this.sizeSelect.addEventListener('change', () => {
+            this.handleSizeChange();
+            this.validateAddButton();
+        });
+
+        // Add item button
+        this.addItemBtn.addEventListener('click', () => this.addItem());
+
+        // Form submission
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+
+        // Enter key support for adding items
+        this.dishSelect.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!this.addItemBtn.disabled) this.addItem();
+            }
+        });
+
+        this.sizeSelect.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!this.addItemBtn.disabled) this.addItem();
+            }
+        });
+
+        // Custom size details input
+        const customSizeDetails = document.getElementById('customSizeDetails');
+        if (customSizeDetails) {
+            customSizeDetails.addEventListener('input', () => this.validateAddButton());
+            customSizeDetails.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!this.addItemBtn.disabled) this.addItem();
+                }
+            });
+        }
+    }
+
+    setMinimumDates() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const minDate = tomorrow.toISOString().split('T')[0];
+        
+        const eventDate = document.getElementById('eventDate');
+        const preferredDate = document.getElementById('preferredDate');
+        
+        if (eventDate) eventDate.min = minDate;
+        if (preferredDate) preferredDate.min = minDate;
+    }
+
+    handleOrderTypeChange(e) {
+        const newType = e.target.dataset.type;
+        if (!newType) return;
+
+        // Update active tab
+        document.querySelectorAll('.order-tab').forEach(tab => tab.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Update order type
+        this.orderType = newType;
+        this.orderTypeData.value = newType;
+
+        // Update UI based on type
+        if (newType === 'catering') {
+            this.eventDetailsSection.style.display = 'block';
+            this.orderSectionTitle.textContent = 'Select Event Menu';
+        } else {
+            this.eventDetailsSection.style.display = 'none';
+            this.orderSectionTitle.textContent = 'Select Your Dishes';
+        }
+
+        this.updateUI();
+    }
+
+    handleSizeChange() {
+        const customSizeInput = document.getElementById('customSizeInput');
+        const customSizeDetails = document.getElementById('customSizeDetails');
+        
+        if (this.sizeSelect.value === 'Custom') {
+            customSizeInput.style.display = 'block';
+            customSizeDetails.required = true;
+        } else {
+            customSizeInput.style.display = 'none';
+            customSizeDetails.required = false;
+            customSizeDetails.value = '';
+        }
+    }
+
+    validateAddButton() {
+        const hasDish = this.dishSelect.value.trim() !== '';
+        const hasSize = this.sizeSelect.value.trim() !== '';
+        
+        // If custom size is selected, also check if custom details are provided
+        if (hasSize && this.sizeSelect.value === 'Custom') {
+            const customDetails = document.getElementById('customSizeDetails').value.trim();
+            this.addItemBtn.disabled = !(hasDish && hasSize && customDetails);
+        } else {
+            this.addItemBtn.disabled = !(hasDish && hasSize);
+        }
+    }
+
+    addItem() {
+        const dish = this.dishSelect.value;
+        const size = this.sizeSelect.value;
+        const sizeOption = this.sizeSelect.querySelector(`option[value="${size}"]`);
+        let serves = sizeOption.dataset.serves || '';
+        
+        // Handle custom size
+        let sizeDisplay = size;
+        if (size === 'Custom') {
+            const customDetails = document.getElementById('customSizeDetails').value.trim();
+            if (!customDetails) return; // Don't add if custom details are missing
+            
+            sizeDisplay = `Custom: ${customDetails}`;
+            serves = customDetails;
+        }
+
+        if (!dish || !size) return;
+
+        // Create item object
+        const item = {
+            id: Date.now() + Math.random(),
+            dish: dish,
+            size: size,
+            sizeDisplay: sizeDisplay,
+            serves: serves,
+            customDetails: size === 'Custom' ? document.getElementById('customSizeDetails').value.trim() : null
+        };
+
+        // Add to selected items
+        this.selectedItems.push(item);
+
+        // Reset selectors
+        this.dishSelect.value = '';
+        this.sizeSelect.value = '';
+        document.getElementById('customSizeDetails').value = '';
+        this.handleSizeChange(); // Hide custom input
+        this.validateAddButton();
+
+        // Update UI
+        this.updateUI();
+
+        // Focus back on dish select for easy multiple additions
+        this.dishSelect.focus();
+    }
+
+    removeItem(itemId) {
+        this.selectedItems = this.selectedItems.filter(item => item.id !== itemId);
+        this.updateUI();
+    }
+
+    updateUI() {
+        this.updateItemCount();
+        this.renderSelectedItems();
+        this.updateOrderSummary();
+        this.updateSubmitButton();
+        this.updateHiddenFields();
+    }
+
+    updateItemCount() {
+        this.itemCount.textContent = this.selectedItems.length;
+    }
+
+    renderSelectedItems() {
+        if (this.selectedItems.length === 0) {
+            this.itemsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🍽️</div>
+                    <p>No items selected yet</p>
+                    <small>Use the form above to add dishes to your order</small>
+                </div>
+            `;
+            return;
+        }
+
+        this.itemsList.innerHTML = this.selectedItems.map(item => {
+            const displaySize = item.sizeDisplay || item.size;
+            const servesText = item.size === 'Custom' ? '' : (item.serves ? `(${item.serves})` : '');
+            
+            return `
+                <div class="selected-item">
+                    <div class="item-info">
+                        <div class="item-name">${item.dish}</div>
+                        <div class="item-size">${displaySize} ${servesText}</div>
+                    </div>
+                    <button type="button" class="item-remove" onclick="orderForm.removeItem(${item.id})" title="Remove item">
+                        ✕
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    updateOrderSummary() {
+        if (this.selectedItems.length === 0) {
+            this.orderSummary.textContent = 'Select items to place your order';
+            return;
+        }
+
+        const itemText = this.selectedItems.length === 1 ? 'item' : 'items';
+        const typeText = this.orderType === 'catering' ? 'catering order' : 'order';
+        this.orderSummary.textContent = `Ready to submit ${typeText} with ${this.selectedItems.length} ${itemText}`;
+    }
+
+    updateSubmitButton() {
+        const hasItems = this.selectedItems.length > 0;
+        const hasCustomerInfo = this.validateCustomerInfo();
+        
+        this.submitBtn.disabled = !(hasItems && hasCustomerInfo);
+    }
+
+    updateHiddenFields() {
+        this.selectedItemsData.value = JSON.stringify(this.selectedItems);
+    }
+
+    validateCustomerInfo() {
+        const name = document.getElementById('customerName').value.trim();
+        const email = document.getElementById('customerEmail').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+        
+        return name.length >= 2 && this.isValidEmail(email) && this.isValidPhone(phone);
+    }
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    isValidPhone(phone) {
+        const digitsOnly = phone.replace(/\D/g, '');
+        return digitsOnly.length === 10 || digitsOnly.length === 11;
+    }
+
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        // Remove existing messages
+        this.removeMessages();
+        
+        // Validate form
+        if (!this.validateForm()) {
+            return;
+        }
+
+        // Show loading state
+        const originalText = this.submitBtn.innerHTML;
+        this.submitBtn.innerHTML = '<span class="btn-icon">⏳</span> Sending Order...';
+        this.submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(this.form);
+            
+            // Add custom subject based on order type
+            const subject = this.orderType === 'catering' 
+                ? 'Event Catering Request from TasteWithChefT Website'
+                : 'Individual Order Request from TasteWithChefT Website';
+            formData.append('_subject', subject);
+
+            const response = await fetch('https://formspree.io/f/xqayzbde', {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                this.showSuccess();
+                this.resetForm();
+            } else {
+                throw new Error('Submission failed');
+            }
+
+        } catch (error) {
+            console.error('Order submission error:', error);
+            this.showError();
+        } finally {
+            this.submitBtn.innerHTML = originalText;
+            this.submitBtn.disabled = false;
+        }
+    }
+
+    validateForm() {
+        const errors = [];
+
+        // Check for items
+        if (this.selectedItems.length === 0) {
+            errors.push('Please add at least one dish to your order');
+        }
+
+        // Check customer info
+        const name = document.getElementById('customerName').value.trim();
+        const email = document.getElementById('customerEmail').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+
+        if (!name || name.length < 2) {
+            errors.push('Please enter your full name');
+        }
+
+        if (!email || !this.isValidEmail(email)) {
+            errors.push('Please enter a valid email address');
+        }
+
+        if (!phone || !this.isValidPhone(phone)) {
+            errors.push('Please enter a valid phone number');
+        }
+
+        // Check catering-specific fields
+        if (this.orderType === 'catering') {
+            const eventDate = document.getElementById('eventDate').value;
+            const guestCount = document.getElementById('guestCount').value;
+            const eventType = document.getElementById('eventType').value;
+
+            if (!eventDate) {
+                errors.push('Please select an event date');
+            }
+
+            if (!guestCount || parseInt(guestCount) < 10) {
+                errors.push('Please enter number of guests (minimum 10)');
+            }
+
+            if (!eventType) {
+                errors.push('Please select event type');
+            }
+        }
+
+        if (errors.length > 0) {
+            this.showValidationErrors(errors);
+            return false;
+        }
+
+        return true;
+    }
+
+    showValidationErrors(errors) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-error';
+        errorDiv.innerHTML = `
+            <strong>❌ Please Fix These Issues:</strong><br>
+            <ul style="margin: 10px 0; padding-left: 20px; text-align: left;">
+                ${errors.map(error => `<li>${error}</li>`).join('')}
+            </ul>
+        `;
+        
+        this.form.parentNode.insertBefore(errorDiv, this.form);
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        setTimeout(() => errorDiv.remove(), 8000);
+    }
+
+    showSuccess() {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'form-success';
+        successDiv.innerHTML = `
+            <strong>🎉 Order Request Submitted Successfully!</strong><br>
+            Thank you for choosing TasteWithChefT! We'll call you within 24 hours to confirm your order details and provide pricing.
+        `;
+        
+        this.form.parentNode.insertBefore(successDiv, this.form);
+        successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        setTimeout(() => successDiv.remove(), 10000);
+    }
+
+    showError() {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'form-error';
+        errorDiv.innerHTML = `
+            <strong>❌ Order Submission Failed</strong><br>
+            Sorry, there was an error. Please try again or call us at 
+            <a href="tel:+14704300782">(470) 430-0782</a>.
+        `;
+        
+        this.form.parentNode.insertBefore(errorDiv, this.form);
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        setTimeout(() => errorDiv.remove(), 8000);
+    }
+
+    removeMessages() {
+        document.querySelectorAll('.form-success, .form-error').forEach(msg => msg.remove());
+    }
+
+    resetForm() {
+        this.selectedItems = [];
+        this.orderType = 'individual';
+        this.form.reset();
+        
+        // Reset tabs
+        document.querySelectorAll('.order-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelector('.order-tab[data-type="individual"]').classList.add('active');
+        
+        // Reset sections
+        this.eventDetailsSection.style.display = 'none';
+        this.orderSectionTitle.textContent = 'Select Your Dishes';
+        
+        this.updateUI();
+    }
+}
+
+/**
+ * Initialize Order Form Functionality
+ */
+function initOrderForm() {
+    // Create global order form manager
+    window.orderForm = new OrderFormManager();
+
+    // Add real-time validation for customer info
+    ['customerName', 'customerEmail', 'customerPhone'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', () => {
+                window.orderForm.updateSubmitButton();
+            });
+        }
+    });
+}
+
+/**
+ * Initialize Testimonials Animations
+ */
+function initTestimonials() {
+    // Animate testimonials on scroll
+    const observeTestimonials = () => {
+        const testimonialCards = document.querySelectorAll('.testimonial-card');
+        const trustItems = document.querySelectorAll('.trust-item');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // Add staggered animation delay
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 150);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '-50px'
+        });
+
+        // Initially hide and position elements
+        [...testimonialCards, ...trustItems].forEach((element) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(30px)';
+            element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(element);
+        });
+    };
+
+    // Animate trust indicator numbers
+    const animateNumbers = () => {
+        const trustNumbers = document.querySelectorAll('.trust-number');
+        
+        const numberObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = entry.target;
+                    const finalNumber = target.textContent;
+                    const isDecimal = finalNumber.includes('.');
+                    
+                    // Extract number for animation
+                    let targetValue;
+                    if (isDecimal) {
+                        targetValue = parseFloat(finalNumber);
+                    } else {
+                        targetValue = parseInt(finalNumber.replace(/\D/g, ''));
+                    }
+                    
+                    if (targetValue && targetValue > 0) {
+                        animateNumber(target, 0, targetValue, finalNumber, 2000);
+                    }
+                    
+                    numberObserver.unobserve(target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        trustNumbers.forEach(number => {
+            numberObserver.observe(number);
+        });
+    };
+
+    // Number animation function
+    const animateNumber = (element, start, end, finalText, duration) => {
+        if (finalText.includes('.')) {
+            // Handle decimal numbers (like 4.9/5)
+            const parts = finalText.split('/');
+            const rating = parseFloat(parts[0]);
+            let current = 0;
+            const increment = rating / (duration / 16);
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= rating) {
+                    element.textContent = finalText;
+                    clearInterval(timer);
+                } else {
+                    element.textContent = current.toFixed(1) + (parts[1] ? '/' + parts[1] : '');
+                }
+            }, 16);
+        } else {
+            // Handle whole numbers
+            const hasPlus = finalText.includes('+');
+            let current = start;
+            const increment = (end - start) / (duration / 16);
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    element.textContent = end.toLocaleString() + (hasPlus ? '+' : '');
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString() + (hasPlus ? '+' : '');
+                }
+            }, 16);
+        }
+    };
+
+    // Add hover effects to testimonial cards
+    const addHoverEffects = () => {
+        const testimonialCards = document.querySelectorAll('.testimonial-card');
+        
+        testimonialCards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Add subtle pulse to stars
+                const stars = card.querySelectorAll('.star');
+                stars.forEach((star, index) => {
+                    setTimeout(() => {
+                        star.style.transform = 'scale(1.2)';
+                        star.style.transition = 'transform 0.2s ease';
+                        
+                        setTimeout(() => {
+                            star.style.transform = 'scale(1)';
+                        }, 200);
+                    }, index * 50);
+                });
+            });
+        });
+    };
+
+    // Initialize all testimonial features
+    if ('IntersectionObserver' in window) {
+        observeTestimonials();
+        animateNumbers();
+    }
+    
+    addHoverEffects();
+    
+    console.log('✨ Testimonials animations initialized');
+}
+
+/**
+ * Initialize FAQ accordion functionality
+ */
+function initFAQ() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        
+        question.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            
+            // Close all other FAQ items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                }
+            });
+            
+            // Toggle current item
+            if (isActive) {
+                item.classList.remove('active');
+            } else {
+                item.classList.add('active');
+            }
+        });
+    });
+    
+    // Add keyboard navigation
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                question.click();
+            }
+        });
+        
+        // Make questions focusable
+        question.setAttribute('tabindex', '0');
+        question.setAttribute('role', 'button');
+        question.setAttribute('aria-expanded', 'false');
+    });
+    
+    // Update aria-expanded when items are toggled
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                const item = mutation.target;
+                const question = item.querySelector('.faq-question');
+                const isActive = item.classList.contains('active');
+                
+                if (question) {
+                    question.setAttribute('aria-expanded', isActive.toString());
+                }
+            }
+        });
+    });
+    
+    faqItems.forEach(item => {
+        observer.observe(item, { attributes: true });
+    });
+    
+    console.log('✨ FAQ accordion initialized');
+}
+
