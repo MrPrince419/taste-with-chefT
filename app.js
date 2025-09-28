@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initNigerianTheme();
     initGallery(); // Add gallery initialization
     initFAQ(); // Add FAQ accordion functionality
+    initExpandableContent(); // Add expandable testimonials and services
+    initMultiStepForm(); // Add multi-step form functionality
+    initAdvancedLazyLoading(); // Add advanced lazy loading for images
 });
 
 /**
@@ -1780,5 +1783,644 @@ function initFAQ() {
     });
     
     console.log('✨ FAQ accordion initialized');
+}
+
+/**
+ * Initialize expandable content for testimonials and services
+ */
+function initExpandableContent() {
+    const expandableElements = document.querySelectorAll('.expandable');
+    
+    expandableElements.forEach(element => {
+        const header = element.querySelector('.testimonial-header, .service-header');
+        const content = element.querySelector('.testimonial-content, .service-details');
+        const expandText = element.querySelector('.expand-text');
+        
+        if (!header || !content) return;
+        
+        // Handle click events
+        header.addEventListener('click', () => {
+            toggleExpandable(element, header, content, expandText);
+        });
+        
+        // Handle keyboard events for accessibility
+        header.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleExpandable(element, header, content, expandText);
+            }
+        });
+    });
+    
+    function toggleExpandable(element, header, content, expandText) {
+        const isExpanded = header.getAttribute('aria-expanded') === 'true';
+        const newState = !isExpanded;
+        
+        // Update ARIA attributes
+        header.setAttribute('aria-expanded', newState);
+        content.setAttribute('aria-hidden', !newState);
+        
+        // Update classes for CSS transitions
+        element.setAttribute('aria-expanded', newState);
+        
+        // Update expand text
+        if (expandText) {
+            const isService = element.querySelector('.service-header');
+            if (newState) {
+                expandText.textContent = 'Show less';
+            } else {
+                expandText.textContent = isService ? 'Learn more' : 'Read more';
+            }
+        }
+        
+        // Smooth scroll to element if expanding and partially off-screen
+        if (newState) {
+            setTimeout(() => {
+                const rect = element.getBoundingClientRect();
+                const isPartiallyVisible = rect.bottom > window.innerHeight;
+                
+                if (isPartiallyVisible) {
+                    element.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }
+            }, 200); // Wait for animation to start
+        }
+    }
+    
+    console.log('✨ Expandable content initialized');
+}
+
+/**
+ * Initialize multi-step form functionality
+ */
+function initMultiStepForm() {
+    const form = document.querySelector('.multi-step-form');
+    if (!form) return;
+    
+    const steps = form.querySelectorAll('.form-step');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const progressFill = document.querySelector('.progress-fill');
+    let currentStep = 1;
+    let formData = {
+        orderType: 'individual'
+    };
+    
+    // Initialize first step
+    showStep(1);
+    
+    // Order type selection
+    const orderTypeCards = form.querySelectorAll('.order-type-card');
+    orderTypeCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Remove active class from all cards
+            orderTypeCards.forEach(c => c.classList.remove('active'));
+            // Add active class to clicked card
+            card.classList.add('active');
+            // Store selection
+            formData.orderType = card.dataset.type;
+            
+            // Show event details section for catering orders
+            const eventDetailsSection = form.querySelector('.event-details-conditional');
+            if (eventDetailsSection) {
+                eventDetailsSection.style.display = formData.orderType === 'catering' ? 'block' : 'none';
+            }
+        });
+    });
+    
+    // Quick order selection
+    const quickOrderCards = form.querySelectorAll('.quick-order-card');
+    quickOrderCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Toggle selection
+            card.classList.toggle('selected');
+            
+            // Auto-fill order details based on selection
+            const orderDetailsTextarea = form.querySelector('#orderDetails');
+            if (orderDetailsTextarea && card.classList.contains('selected')) {
+                const comboType = card.dataset.combo;
+                let description = '';
+                
+                switch (comboType) {
+                    case 'jollof-combo':
+                        description = 'Jollof Special: Jollof rice with grilled chicken and fried plantain';
+                        break;
+                    case 'party-tray':
+                        description = 'Party Tray: Mixed rice dishes with assorted proteins and sides';
+                        break;
+                    case 'custom':
+                        description = '';
+                        orderDetailsTextarea.focus();
+                        break;
+                }
+                
+                if (description) {
+                    orderDetailsTextarea.value = description;
+                }
+            }
+        });
+    });
+    
+    // Navigation buttons
+    const nextButtons = form.querySelectorAll('.btn-next');
+    const backButtons = form.querySelectorAll('.btn-back');
+    
+    nextButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const nextStep = parseInt(btn.dataset.next);
+            
+            if (validateStep(currentStep)) {
+                currentStep = nextStep;
+                showStep(currentStep);
+            }
+        });
+    });
+    
+    backButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const prevStep = parseInt(btn.dataset.back);
+            currentStep = prevStep;
+            showStep(currentStep);
+        });
+    });
+    
+    // Form submission with AJAX
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Always prevent default form submission
+        
+        if (!validateStep(currentStep)) {
+            return;
+        }
+        
+        // Show loading state
+        const submitButton = form.querySelector('.btn-submit');
+        const originalButtonContent = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="btn-icon">⏳</span>Sending Order...';
+        
+        try {
+            // Prepare form data
+            const formDataObj = new FormData(form);
+            formDataObj.append('order_type', formData.orderType);
+            
+            // Send form data via AJAX (with fallback)
+            let response;
+            if (typeof fetch !== 'undefined') {
+                response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formDataObj,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+            } else {
+                // Fallback for older browsers using XMLHttpRequest
+                response = await sendFormWithXHR(form.action, formDataObj);
+            }
+            
+            if (response.ok) {
+                // Success - show success message and reset form
+                showFormSuccess();
+                form.reset();
+                currentStep = 1;
+                showStep(1);
+                
+                // Track successful submission
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'form_submit', {
+                        'event_category': 'engagement',
+                        'event_label': formData.orderType
+                    });
+                }
+            } else {
+                // Handle server errors
+                const errorData = await response.json().catch(() => ({}));
+                showFormError(errorData.error || 'There was a problem sending your order. Please try again.');
+            }
+        } catch (error) {
+            // Handle network errors
+            console.error('Form submission error:', error);
+            showFormError('Unable to send your order. Please check your connection and try again, or call us directly at (470) 430-0782.');
+        } finally {
+            // Restore button state
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonContent;
+        }
+    });
+    
+    function showStep(stepNumber) {
+        // Hide all steps
+        steps.forEach(step => {
+            step.classList.remove('active');
+        });
+        
+        // Show current step
+        const currentStepElement = form.querySelector(`[data-step="${stepNumber}"]`);
+        if (currentStepElement) {
+            currentStepElement.classList.add('active');
+        }
+        
+        // Update progress indicator
+        progressSteps.forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+            if (index < stepNumber - 1) {
+                step.classList.add('completed');
+            } else if (index === stepNumber - 1) {
+                step.classList.add('active');
+            }
+        });
+        
+        // Update progress bar
+        const progressPercentage = (stepNumber / steps.length) * 100;
+        if (progressFill) {
+            progressFill.style.width = `${progressPercentage}%`;
+        }
+        
+        // Focus management for accessibility
+        setTimeout(() => {
+            const firstInput = currentStepElement?.querySelector('input, textarea, button');
+            if (firstInput && stepNumber > 1) {
+                firstInput.focus();
+            }
+        }, 300);
+    }
+    
+    function validateStep(stepNumber) {
+        const currentStepElement = form.querySelector(`[data-step="${stepNumber}"]`);
+        if (!currentStepElement) return true;
+        
+        const requiredFields = currentStepElement.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            // Remove previous error styling
+            field.classList.remove('error');
+            
+            if (!field.value.trim()) {
+                field.classList.add('error');
+                isValid = false;
+                
+                // Add error styling
+                field.style.borderColor = '#ef4444';
+                
+                // Remove error styling on input
+                field.addEventListener('input', () => {
+                    field.style.borderColor = '';
+                    field.classList.remove('error');
+                }, { once: true });
+            }
+        });
+        
+        if (!isValid) {
+            // Show error message
+            showFormMessage('Please fill in all required fields', 'error');
+        }
+        
+        return isValid;
+    }
+    
+    function showFormMessage(message, type = 'info') {
+        // Remove existing messages
+        const existingMessage = form.querySelector('.form-message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+        
+        // Create new message
+        const messageElement = document.createElement('div');
+        messageElement.className = `form-message form-message-${type}`;
+        messageElement.textContent = message;
+        messageElement.style.cssText = `
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: ${type === 'error' ? '#fef2f2' : '#f0f9ff'};
+            color: ${type === 'error' ? '#dc2626' : '#0369a1'};
+            border: 1px solid ${type === 'error' ? '#fecaca' : '#bae6fd'};
+        `;
+        
+        // Insert message
+        const currentStepElement = form.querySelector(`[data-step="${currentStep}"]`);
+        const stepContent = currentStepElement?.querySelector('.step-content');
+        if (stepContent) {
+            stepContent.appendChild(messageElement);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                messageElement.remove();
+            }, 5000);
+        }
+    }
+    
+    function showFormSuccess() {
+        // Create success overlay
+        const successOverlay = document.createElement('div');
+        successOverlay.className = 'form-success-overlay';
+        successOverlay.innerHTML = `
+            <div class="success-content">
+                <div class="success-icon">✅</div>
+                <h3>Order Request Sent!</h3>
+                <p>Thank you for your order! We'll call you within 24 hours to confirm details and pricing.</p>
+                <div class="success-actions">
+                    <button class="btn btn-primary" onclick="this.closest('.form-success-overlay').remove()">
+                        Continue Browsing
+                    </button>
+                    <a href="tel:+14704300782" class="btn btn-secondary">
+                        <span class="btn-icon">📞</span>
+                        Call Us Now
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        // Style the overlay
+        successOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        `;
+        
+        // Style the success content
+        const successContentStyle = `
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            margin: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        `;
+        
+        document.body.appendChild(successOverlay);
+        
+        const successContent = successOverlay.querySelector('.success-content');
+        successContent.style.cssText = successContentStyle;
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (successOverlay.parentNode) {
+                successOverlay.remove();
+            }
+        }, 10000);
+    }
+    
+    function showFormError(message) {
+        // Create error overlay
+        const errorOverlay = document.createElement('div');
+        errorOverlay.className = 'form-error-overlay';
+        errorOverlay.innerHTML = `
+            <div class="error-content">
+                <div class="error-icon">❌</div>
+                <h3>Unable to Send Order</h3>
+                <p>${message}</p>
+                <div class="error-actions">
+                    <button class="btn btn-primary" onclick="this.closest('.form-error-overlay').remove()">
+                        Try Again
+                    </button>
+                    <a href="tel:+14704300782" class="btn btn-secondary">
+                        <span class="btn-icon">📞</span>
+                        Call Instead
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        // Style the overlay
+        errorOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        `;
+        
+        // Style the error content
+        const errorContentStyle = `
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            margin: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        `;
+        
+        document.body.appendChild(errorOverlay);
+        
+        const errorContent = errorOverlay.querySelector('.error-content');
+        errorContent.style.cssText = errorContentStyle;
+        
+        // Auto-remove after 15 seconds
+        setTimeout(() => {
+            if (errorOverlay.parentNode) {
+                errorOverlay.remove();
+            }
+        }, 15000);
+    }
+    
+    // XMLHttpRequest fallback for older browsers
+    function sendFormWithXHR(url, formData) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            
+            xhr.open('POST', url);
+            xhr.setRequestHeader('Accept', 'application/json');
+            
+            xhr.onload = function() {
+                resolve({
+                    ok: xhr.status >= 200 && xhr.status < 300,
+                    status: xhr.status,
+                    json: () => Promise.resolve(JSON.parse(xhr.responseText || '{}'))
+                });
+            };
+            
+            xhr.onerror = function() {
+                reject(new Error('Network error'));
+            };
+            
+            xhr.send(formData);
+        });
+    }
+    
+    console.log('✨ Multi-step form initialized');
+}
+
+/**
+ * Initialize advanced lazy loading for images
+ */
+function initAdvancedLazyLoading() {
+    // Check for Intersection Observer support
+    if (!('IntersectionObserver' in window)) {
+        // Fallback for older browsers
+        fallbackLazyLoading();
+        return;
+    }
+    
+    const lazyImages = document.querySelectorAll('.lazy-image');
+    const lazyContainers = document.querySelectorAll('.lazy-load');
+    
+    // Image loading options
+    const imageObserverOptions = {
+        root: null,
+        rootMargin: '50px', // Start loading 50px before image comes into view
+        threshold: 0.1
+    };
+    
+    // Create intersection observer for images
+    const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                loadImage(entry.target);
+                imageObserver.unobserve(entry.target);
+            }
+        });
+    }, imageObserverOptions);
+    
+    // Observe all lazy images
+    lazyImages.forEach(img => {
+        imageObserver.observe(img);
+    });
+    
+    function loadImage(img) {
+        const container = img.closest('.lazy-load');
+        const placeholder = container?.querySelector('.image-placeholder');
+        
+        // Add loading state
+        if (container) {
+            container.classList.add('loading');
+        }
+        
+        // Create a new image to preload
+        const imageLoader = new Image();
+        
+        imageLoader.onload = () => {
+            // Image loaded successfully
+            img.src = img.dataset.src;
+            img.classList.add('loaded');
+            
+            if (container) {
+                container.classList.remove('loading');
+                container.classList.add('loaded');
+            }
+            
+            // Remove data-src to prevent reloading
+            img.removeAttribute('data-src');
+            
+            // Trigger custom event for analytics/tracking
+            img.dispatchEvent(new CustomEvent('imageLoaded', {
+                detail: { src: img.src, alt: img.alt }
+            }));
+        };
+        
+        imageLoader.onerror = () => {
+            // Handle image loading error
+            img.classList.add('error');
+            if (container) {
+                container.classList.remove('loading');
+                container.classList.add('error');
+            }
+            
+            // Show error placeholder
+            if (placeholder) {
+                placeholder.innerHTML = '❌';
+                placeholder.style.fontSize = '2rem';
+            }
+            
+            console.warn('Failed to load image:', img.dataset.src);
+        };
+        
+        // Start loading the image
+        imageLoader.src = img.dataset.src;
+    }
+    
+    // Fallback for browsers without Intersection Observer
+    function fallbackLazyLoading() {
+        const lazyImages = document.querySelectorAll('.lazy-image');
+        
+        function loadImagesInViewport() {
+            lazyImages.forEach(img => {
+                if (img.dataset.src && isInViewport(img)) {
+                    loadImage(img);
+                }
+            });
+        }
+        
+        function isInViewport(element) {
+            const rect = element.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+        
+        // Load images on scroll and resize
+        window.addEventListener('scroll', throttle(loadImagesInViewport, 200));
+        window.addEventListener('resize', throttle(loadImagesInViewport, 200));
+        
+        // Initial load
+        loadImagesInViewport();
+    }
+    
+    // Throttle function for performance
+    function throttle(func, delay) {
+        let timeoutId;
+        let lastExecTime = 0;
+        return function (...args) {
+            const currentTime = Date.now();
+            
+            if (currentTime - lastExecTime > delay) {
+                func.apply(this, args);
+                lastExecTime = currentTime;
+            } else {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(this, args);
+                    lastExecTime = Date.now();
+                }, delay - (currentTime - lastExecTime));
+            }
+        };
+    }
+    
+    // Preload critical images (first few in viewport)
+    function preloadCriticalImages() {
+        const criticalImages = document.querySelectorAll('.lazy-image');
+        const preloadCount = Math.min(3, criticalImages.length); // Preload first 3 images
+        
+        for (let i = 0; i < preloadCount; i++) {
+            const img = criticalImages[i];
+            if (img.dataset.src) {
+                // Check if image is likely to be above the fold
+                const rect = img.getBoundingClientRect();
+                if (rect.top < window.innerHeight) {
+                    loadImage(img);
+                }
+            }
+        }
+    }
+    
+    // Preload critical images after a short delay
+    setTimeout(preloadCriticalImages, 100);
+    
+    console.log('✨ Advanced lazy loading initialized');
 }
 
