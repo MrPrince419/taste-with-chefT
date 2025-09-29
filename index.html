@@ -103,13 +103,20 @@
             </div>
             
             <!-- Mobile menu button -->
-            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
+            <button class="mobile-menu-toggle" 
+                    aria-label="Toggle mobile menu" 
+                    aria-expanded="false"
+                    aria-controls="nav-links"
+                    type="button">
+                <span class="hamburger-line" aria-hidden="true"></span>
+                <span class="hamburger-line" aria-hidden="true"></span>
+                <span class="hamburger-line" aria-hidden="true"></span>
             </button>
             
-            <div class="nav-links">
+            <!-- Mobile menu backdrop -->
+            <div class="mobile-menu-backdrop"></div>
+            
+            <div class="nav-links" id="nav-links" role="navigation" aria-label="Main navigation">
                 <a href="#about" class="nav-link">
                     <span class="nav-icon">👩‍🍳</span>
                     <span class="nav-text">About Chef T</span>
