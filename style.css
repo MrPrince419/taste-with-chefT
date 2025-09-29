@@ -30,7 +30,7 @@
   --color-background: var(--color-cream-50);
   --color-surface: var(--color-cream-100);
   --color-text: var(--color-slate-900);
-  --color-text-secondary: var(--color-slate-500);
+  --color-text-secondary: #2f4f4f;
   --color-primary: var(--color-brand-primary);
   --color-primary-hover: var(--color-brand-primary-hover);
   --color-primary-active: var(--color-brand-primary-active);
@@ -255,11 +255,16 @@ body {
   .btn-next, .btn-back, .btn-submit,
   .step-actions .btn {
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 300px !important;
     box-sizing: border-box !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
     margin-bottom: var(--space-8) !important;
+    min-width: 0 !important;
+    text-align: center !important;
+    display: block !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
   }
   
   .step-actions {
@@ -1616,6 +1621,11 @@ select.form-control {
   border: 1px solid var(--color-border);
   text-align: center;
   transition: transform var(--duration-normal) var(--ease-standard);
+  min-height: 180px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .reason-item:hover {
@@ -1670,6 +1680,11 @@ select.form-control {
   text-align: center;
   transition: all var(--duration-normal) var(--ease-standard);
   position: relative;
+  min-height: 200px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .service-card:hover {
@@ -1759,6 +1774,7 @@ select.form-control {
   width: 100%;
   padding: var(--space-16);
   position: relative;
+  align-items: start;
 }
 
 .menu-item {
@@ -1773,6 +1789,8 @@ select.form-control {
   margin-bottom: var(--space-16);
   position: relative;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 120px;
+  height: auto;
 }
 
 .menu-item:hover {
@@ -1815,16 +1833,23 @@ select.form-control {
 .item-prices {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-8);
   align-items: flex-end;
+  justify-content: center;
+  min-width: 100px;
+  flex-shrink: 0;
 }
 
 .price {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-  padding: var(--space-4) var(--space-8);
+  padding: 8px 16px;
   border-radius: var(--radius-sm);
   white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
+  display: inline-block;
+  box-sizing: border-box;
 }
 
 .price.half {
@@ -2470,8 +2495,17 @@ select.form-control {
   .item-prices {
     flex-direction: row;
     gap: var(--space-8);
-    align-items: flex-start;
+    align-items: center;
+    justify-content: flex-start;
     width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .price {
+    padding: 6px 12px !important;
+    font-size: var(--font-size-xs) !important;
+    min-width: 70px !important;
+    flex: 0 0 auto;
   }
   
   .contact-info {
@@ -2673,7 +2707,7 @@ select.form-control {
   gap: clamp(var(--space-16), 3vw, var(--space-32));
   width: 100%;
   margin: 0 auto;
-  padding: 0 clamp(var(--space-8), 2vw, var(--space-16));
+  padding: 0 clamp(var(--space-8), 2vw, var(--space-16)) 60px;
   /* Remove container constraints to prevent scrollable box behavior */
   max-width: none;
   overflow: visible;
@@ -2684,9 +2718,13 @@ select.form-control {
   border-radius: 15px;
   overflow: hidden;
   cursor: pointer;
-  /* Ensure natural height flow */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   height: auto;
-  min-height: auto;
+  min-height: 300px;
+  background: var(--color-surface);
 }
 
 /* Lazy Loading Optimization */
@@ -2763,9 +2801,10 @@ select.form-control {
 
 .gallery-item img {
   width: 100%;
-  height: 250px;
+  height: 200px;
   object-fit: cover;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .gallery-item:hover img {
@@ -2777,9 +2816,9 @@ select.form-control {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
   color: var(--color-white);
-  padding: var(--space-24);
+  padding: var(--space-16);
   transform: translateY(100%);
   transition: transform 0.3s ease;
 }
@@ -2792,12 +2831,15 @@ select.form-control {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--space-8);
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .gallery-overlay p {
   font-size: var(--font-size-sm);
-  opacity: 0.9;
+  color: #f0f0f0;
   margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 /* Gallery Modal */
@@ -2933,7 +2975,7 @@ select.form-control {
   .gallery-grid {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--space-16);
-    padding: 0 var(--space-12);
+    padding: 0 var(--space-12) 80px;
     /* Ensure grid flows naturally */
     max-width: none;
     overflow: visible;
@@ -2976,7 +3018,7 @@ select.form-control {
   .gallery-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-12);
-    padding: 0 var(--space-8);
+    padding: 0 var(--space-8) 100px;
     /* Remove any scrollable container behavior */
     max-width: none;
     overflow: visible;
@@ -3009,13 +3051,21 @@ select.form-control {
   .gallery-overlay {
     position: relative;
     transform: none;
-    background: var(--color-surface);
-    color: var(--color-text);
+    background: #f5f5f5;
+    color: #2f4f4f;
     padding: var(--space-16);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
   }
   
   .gallery-overlay h3 {
     font-size: var(--font-size-base);
+    color: #2f4f4f;
+    text-shadow: none;
+  }
+  
+  .gallery-overlay p {
+    color: #2f4f4f;
+    text-shadow: none;
   }
 }
 
@@ -3186,6 +3236,11 @@ select.form-control {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 250px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .testimonial-card::before {
@@ -3702,7 +3757,7 @@ select.form-control {
 
 .order-type-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: var(--space-20);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -3711,6 +3766,10 @@ select.form-control {
   transition: all 0.3s ease;
   min-height: 80px; /* Touch target */
   text-align: left;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .order-type-card:hover {
@@ -3726,6 +3785,16 @@ select.form-control {
 .card-icon {
   font-size: var(--font-size-3xl);
   margin-right: var(--space-16);
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: var(--space-4);
+}
+
+.card-content {
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .card-content h5 {
@@ -3733,17 +3802,33 @@ select.form-control {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text);
   margin-bottom: var(--space-4);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .card-content p {
   color: var(--color-text-secondary);
   margin-bottom: var(--space-8);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .card-note {
   font-size: var(--font-size-sm);
   color: var(--color-brand-primary);
   font-weight: var(--font-weight-medium);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  white-space: normal;
+  /* Limit to 2 lines for cleaner look */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Quick Order Cards */
@@ -3807,11 +3892,14 @@ select.form-control {
 /* Touch-Friendly Form Elements */
 .touch-friendly {
   min-height: 48px; /* Minimum touch target */
-  padding: var(--space-16);
+  padding: 12px 16px;
   font-size: var(--font-size-base);
   border-radius: var(--radius-lg);
-  border: 2px solid var(--color-border);
+  border: 2px solid #ff69b4;
   transition: all 0.3s ease;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-input.touch-friendly:focus {
@@ -3831,6 +3919,8 @@ textarea.touch-friendly {
   align-items: center;
   padding-top: var(--space-24);
   border-top: 1px solid var(--color-border);
+  gap: var(--space-16);
+  flex-wrap: wrap;
 }
 
 .btn-back,
@@ -3846,6 +3936,10 @@ textarea.touch-friendly {
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
+  margin: 8px 0;
+  min-width: 120px;
+  justify-content: center;
+  flex: 0 0 auto;
 }
 
 .btn-back {
@@ -3989,6 +4083,35 @@ textarea.touch-friendly {
     display: none;
   }
   
+  /* Enhanced mobile fixes for order type cards */
+  .order-type-card {
+    padding: var(--space-16) !important;
+    min-height: 90px;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  
+  .card-icon {
+    font-size: var(--font-size-2xl);
+    margin-right: var(--space-12);
+    margin-top: 0;
+  }
+  
+  .card-content h5 {
+    font-size: var(--font-size-base);
+    line-height: 1.3;
+  }
+  
+  .card-content p {
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+  }
+  
+  .card-note {
+    font-size: var(--font-size-xs);
+    line-height: 1.3;
+  }
+  
   .step-title {
     font-size: var(--font-size-lg);
   }
@@ -4120,8 +4243,8 @@ textarea.touch-friendly {
 .form-input {
   width: 100%;
   max-width: 100%;
-  padding: var(--space-12) var(--space-16);
-  border: 2px solid var(--color-border);
+  padding: 12px 16px;
+  border: 2px solid #ff69b4;
   border-radius: var(--radius-base);
   font-size: var(--font-size-base);
   font-family: inherit;
@@ -4129,8 +4252,10 @@ textarea.touch-friendly {
   color: var(--color-text);
   transition: all 0.2s ease;
   box-sizing: border-box;
-  /* Prevent width overflow */
   min-width: 0;
+  min-width: 100%;
+  /* Ensure proper spacing for longer inputs like phone numbers */
+  letter-spacing: 0.02em;
 }
 
 .form-input:focus {
@@ -4141,13 +4266,16 @@ textarea.touch-friendly {
 
 .form-input:invalid,
 .form-input.error {
-  border-color: var(--color-error);
-  background-color: rgba(233, 30, 99, 0.05);
+  border-color: #ff0000 !important;
+  background-color: rgba(255, 0, 0, 0.05);
+  /* Maintain layout consistency */
+  padding: 12px 16px;
+  box-sizing: border-box;
 }
 
 .form-input.error:focus {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
+  border-color: #ff0000 !important;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.2);
 }
 
 .form-input::placeholder {
@@ -4597,14 +4725,32 @@ textarea.form-input {
   }
   
   .form-input {
-    padding: var(--space-8) var(--space-10);
+    padding: 12px 16px !important;
     font-size: var(--font-size-sm);
     /* Ensure mobile form inputs fit properly */
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     min-width: 0;
+    border: 2px solid #ff69b4 !important;
+    letter-spacing: 0.02em;
   }
+  
+  .step-actions {
+    flex-direction: column;
+    gap: var(--space-8);
+    align-items: stretch;
+  }
+  
+  .btn-back,
+  .btn-next,
+  .btn-submit {
+    width: 100%;
+    max-width: 280px;
+    align-self: center;
+    margin: 4px 0;
+  }
+}
   
   .form-label {
     font-size: var(--font-size-xs);
@@ -4907,5 +5053,162 @@ textarea.form-input {
   
   .reason-item p {
     font-size: var(--font-size-xs);
+  }
+}
+
+/* Enhanced responsiveness for very small screens (375px and below) */
+@media (max-width: 375px) {
+  /* Typography adjustments for small screens */
+  .hero-title {
+    font-size: var(--font-size-2xl) !important;
+    line-height: 1.2;
+    padding: 0 var(--space-8);
+  }
+  
+  .hero-subtitle {
+    font-size: var(--font-size-base) !important;
+    padding: 0 var(--space-8);
+  }
+  
+  .section-title {
+    font-size: var(--font-size-xl) !important;
+    padding: 0 var(--space-8);
+  }
+  
+  /* Navigation adjustments */
+  .navbar .container {
+    padding: var(--space-8) var(--space-12) !important;
+  }
+  
+  .nav-logo {
+    font-size: var(--font-size-lg) !important;
+  }
+  
+  /* Card and content adjustments */
+  .menu-item,
+  .service-card,
+  .reason-item,
+  .testimonial-card {
+    padding: var(--space-12) !important;
+    margin: var(--space-8) 0;
+  }
+  
+  /* Form improvements for very small screens */
+  .form-input {
+    padding: 10px 12px !important;
+    font-size: var(--font-size-xs) !important;
+  }
+  
+  .form-label {
+    font-size: var(--font-size-xs) !important;
+  }
+  
+  /* Gallery optimizations */
+  .gallery-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-8) !important;
+    padding: 0 var(--space-8) 120px !important;
+  }
+  
+  .gallery-item {
+    min-height: 250px !important;
+  }
+  
+  .gallery-item img {
+    height: 180px !important;
+  }
+  
+  /* Menu grid single column for very small screens */
+  .menu-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-12) !important;
+    padding: 0 var(--space-8) !important;
+  }
+  
+  /* Price buttons adjustments */
+  .price {
+    padding: 4px 8px !important;
+    font-size: var(--font-size-xs) !important;
+    min-width: 60px !important;
+  }
+  
+  /* Order type cards single column */
+  .order-type-cards {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-8) !important;
+  }
+  
+  /* Enhanced button spacing */
+  .btn,
+  .btn-primary,
+  .btn-secondary {
+    padding: var(--space-10) var(--space-16) !important;
+    font-size: var(--font-size-sm) !important;
+    min-height: 44px !important;
+  }
+  
+  /* Footer adjustments */
+  .footer-content {
+    flex-direction: column !important;
+    gap: var(--space-16) !important;
+    text-align: center;
+  }
+  
+  /* Testimonials single column */
+  .testimonials-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-16) !important;
+  }
+}
+
+/* Extra small screens (320px and below) - Optimized for oldest devices */
+@media (max-width: 320px) {
+  /* Ultra-compact typography */
+  .hero-title {
+    font-size: var(--font-size-xl) !important;
+    line-height: 1.1;
+  }
+  
+  .section-title {
+    font-size: var(--font-size-lg) !important;
+  }
+  
+  /* Minimal padding everywhere */
+  .container,
+  section {
+    padding-left: var(--space-4) !important;
+    padding-right: var(--space-4) !important;
+  }
+  
+  /* Compact cards */
+  .menu-item,
+  .service-card,
+  .reason-item {
+    padding: var(--space-8) !important;
+  }
+  
+  /* Ultra-small form inputs */
+  .form-input {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Minimal gallery spacing */
+  .gallery-grid {
+    padding: 0 var(--space-4) 140px !important;
+    gap: var(--space-4) !important;
+  }
+  
+  /* Compact buttons */
+  .btn {
+    padding: var(--space-8) var(--space-12) !important;
+    font-size: 12px !important;
+  }
+  
+  /* Price buttons even smaller */
+  .price {
+    padding: 3px 6px !important;
+    font-size: 10px !important;
+    min-width: 50px !important;
   }
 }
