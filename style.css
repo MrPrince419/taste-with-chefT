@@ -206,17 +206,40 @@ body {
   box-sizing: border-box;
 }
 
-/* Universal mobile width fix */
+/* Universal mobile width fix with rounded corners */
 @media (max-width: 768px) {
+  /* Ensure all cards have rounded corners */
+  .card, .menu-item, .reason-item, .service-card, .gallery-item,
+  .contact-card, .testimonial-card, .faq-item,
+  .hero-info-item, .form-group, .btn {
+    border-radius: var(--radius-lg) !important;
+  }
+  
+  /* Smaller elements use smaller radius */
+  .btn, .form-input, .badge {
+    border-radius: var(--radius-base) !important;
+  }
+  /* Fix all sections and containers */
+  .about, .services, .menu, .gallery, .contact,
+  .about-content, .services-content, .menu-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    padding-left: var(--space-8) !important;
+    padding-right: var(--space-8) !important;
+  }
+  
   /* Fix all card-like elements */
   .menu-item, .reason-item, .service-card, .gallery-item,
   .contact-card, .testimonial-card, .faq-item {
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: calc(100% - 1rem) !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    /* Ensure rounded corners on mobile */
+    border-radius: var(--radius-lg) !important;
   }
   
   /* Fix form elements */
@@ -228,12 +251,22 @@ body {
   }
   
   /* Fix buttons and interactive elements */
-  .btn, .button, .form-submit {
+  .btn, .button, .form-submit,
+  .btn-next, .btn-back, .btn-submit,
+  .step-actions .btn {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    margin-bottom: var(--space-8) !important;
+  }
+  
+  .step-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-12) !important;
+    width: 100% !important;
   }
   
   /* Fix footer and sections */
@@ -255,10 +288,21 @@ body {
   
   /* Fix specific button layouts */
   .hero-actions .btn,
-  .form-actions .btn {
+  .form-actions .btn,
+  .step-actions .btn,
+  .btn-next, .btn-back, .btn-submit {
     margin-bottom: var(--space-12) !important;
     display: block !important;
     width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .step-actions {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-8) !important;
   }
 }
 
@@ -1560,6 +1604,9 @@ select.form-control {
   gap: clamp(var(--space-16), 3vw, var(--space-24));
   width: 100%;
   max-width: 100%;
+  /* Remove any scrolling behavior */
+  overflow: visible;
+  height: auto;
 }
 
 .reason-item {
@@ -2342,16 +2389,28 @@ select.form-control {
   .reasons-grid,
   .services-grid {
     grid-template-columns: 1fr;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    height: auto !important;
+    box-sizing: border-box !important;
   }
   
   .menu-grid {
     grid-template-columns: 1fr;
-    padding: var(--space-8);
-    /* Ensure menu grid fits mobile */
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
+    padding: var(--space-8) !important;
+    /* Force menu grid to fit mobile */
+    width: 100% !important;
+    max-width: calc(100vw - 1rem) !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+  
+  .menu-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
   }
 
   .menu-tabs {
@@ -2383,12 +2442,22 @@ select.form-control {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: var(--space-16);
-    padding: var(--space-16);
-    /* Ensure proper mobile width */
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
+    padding: var(--space-16) !important;
+    /* Force proper mobile width */
+    width: 100% !important;
+    max-width: calc(100vw - 2rem) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    /* Ensure rounded corners */
+    border-radius: var(--radius-lg) !important;
+  }
+  
+  .menu-item * {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
   }
   
   .item-info {
@@ -2527,12 +2596,23 @@ select.form-control {
   .contact-card,
   .service-card,
   .reason-item {
-    padding: var(--space-16);
-    /* Ensure proper mobile width */
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
+    padding: var(--space-16) !important;
+    /* Force proper mobile width */
+    width: 100% !important;
+    max-width: calc(100vw - 2rem) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    /* Ensure rounded corners */
+    border-radius: var(--radius-lg) !important;
+  }
+  
+  .about-content,
+  .why-choose {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
   }
   
   .coming-soon {
@@ -4801,6 +4881,7 @@ textarea.form-input {
   .testimonial-card {
     padding: var(--space-12);
     margin: 0 var(--space-4);
+    border-radius: var(--radius-lg) !important;
   }
   
   .customer-avatar {
@@ -4811,6 +4892,7 @@ textarea.form-input {
   /* Compact reason items (about section) */
   .reason-item {
     padding: var(--space-16);
+    border-radius: var(--radius-lg) !important;
   }
   
   .reason-icon {
