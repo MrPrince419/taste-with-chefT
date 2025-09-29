@@ -2314,22 +2314,55 @@ function initAdvancedLazyLoading() {
         const container = img.closest('.lazy-load');
         const placeholder = container?.querySelector('.image-placeholder');
         
+        // Skip if already loaded or loading
+        if (img.classList.contains('loaded') || img.classList.contains('loading')) {
+            return;
+        }
+        
         // Add loading state
+        img.classList.add('loading');
         if (container) {
             container.classList.add('loading');
         }
         
-        // Create a new image to preload
+        // Get image source with fallback handling
+        let imageSrc = img.dataset.src || img.getAttribute('data-src');
+        
+        if (!imageSrc) {
+            console.warn('No image source found for:', img);
+            handleImageError(img, container, placeholder, 'No source');
+            return;
+        }
+        
+        // Normalize the image path
+        imageSrc = imageSrc.trim();
+        
+        // Create a new image to preload with enhanced error handling
         const imageLoader = new Image();
         
+        // Set up timeout for slow loading images
+        const loadTimeout = setTimeout(() => {
+            console.warn('Image loading timeout:', imageSrc);
+            handleImageError(img, container, placeholder, 'Timeout');
+        }, 10000); // 10 second timeout
+        
         imageLoader.onload = () => {
+            clearTimeout(loadTimeout);
+            
             // Image loaded successfully
-            img.src = img.dataset.src;
+            img.src = imageSrc;
+            img.classList.remove('loading');
             img.classList.add('loaded');
             
             if (container) {
                 container.classList.remove('loading');
                 container.classList.add('loaded');
+            }
+            
+            // Hide placeholder
+            if (placeholder) {
+                placeholder.style.opacity = '0';
+                placeholder.style.pointerEvents = 'none';
             }
             
             // Remove data-src to prevent reloading
@@ -2342,24 +2375,39 @@ function initAdvancedLazyLoading() {
         };
         
         imageLoader.onerror = () => {
-            // Handle image loading error
-            img.classList.add('error');
-            if (container) {
-                container.classList.remove('loading');
-                container.classList.add('error');
-            }
-            
-            // Show error placeholder
-            if (placeholder) {
-                placeholder.innerHTML = '❌';
-                placeholder.style.fontSize = '2rem';
-            }
-            
-            console.warn('Failed to load image:', img.dataset.src);
+            clearTimeout(loadTimeout);
+            console.error('Failed to load image:', imageSrc);
+            handleImageError(img, container, placeholder, 'Load Error');
         };
         
         // Start loading the image
-        imageLoader.src = img.dataset.src;
+        imageLoader.src = imageSrc;
+    }
+    
+    function handleImageError(img, container, placeholder, errorType) {
+        img.classList.remove('loading');
+        img.classList.add('error');
+        
+        if (container) {
+            container.classList.remove('loading');
+            container.classList.add('error');
+        }
+        
+        // Show error placeholder with better styling
+        if (placeholder) {
+            placeholder.innerHTML = '🖼️';
+            placeholder.style.fontSize = '2.5rem';
+            placeholder.style.opacity = '0.6';
+            placeholder.title = `Image failed to load (${errorType})`;
+        }
+        
+        // Try alternative image source if available
+        const altSrc = img.getAttribute('data-alt-src');
+        if (altSrc && !img.hasAttribute('data-retry-attempted')) {
+            img.setAttribute('data-retry-attempted', 'true');
+            img.setAttribute('data-src', altSrc);
+            setTimeout(() => loadImage(img), 1000); // Retry after 1 second
+        }
     }
     
     // Fallback for browsers without Intersection Observer
@@ -2415,23 +2463,85 @@ function initAdvancedLazyLoading() {
     // Preload critical images (first few in viewport)
     function preloadCriticalImages() {
         const criticalImages = document.querySelectorAll('.lazy-image');
-        const preloadCount = Math.min(3, criticalImages.length); // Preload first 3 images
+        const isMobile = window.innerWidth <= 768;
+        const preloadCount = Math.min(isMobile ? 2 : 4, criticalImages.length);
         
         for (let i = 0; i < preloadCount; i++) {
             const img = criticalImages[i];
             if (img.dataset.src) {
                 // Check if image is likely to be above the fold
                 const rect = img.getBoundingClientRect();
-                if (rect.top < window.innerHeight) {
+                if (rect.top < window.innerHeight * 1.5) { // Increased threshold
                     loadImage(img);
                 }
             }
         }
     }
     
-    // Preload critical images after a short delay
-    setTimeout(preloadCriticalImages, 100);
+    // Enhanced mobile handling
+    function handleMobileOptimizations() {
+        if ('connection' in navigator) {
+            const connection = navigator.connection;
+            if (connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+                // Reduce preload count for slow connections
+                console.log('Slow connection detected, reducing image preloading');
+                return;
+            }
+        }
+        
+        // Add retry mechanism for failed images
+        setTimeout(() => {
+            const failedImages = document.querySelectorAll('.lazy-image.error');
+            failedImages.forEach(img => {
+                if (!img.hasAttribute('data-retry-attempted')) {
+                    console.log('Retrying failed image:', img.dataset.src);
+                    img.classList.remove('error');
+                    img.removeAttribute('data-retry-attempted');
+                    loadImage(img);
+                }
+            });
+        }, 3000);
+    }
     
-    console.log('✨ Advanced lazy loading initialized');
+    // Preload critical images after DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(preloadCriticalImages, 100);
+            setTimeout(handleMobileOptimizations, 2000);
+        });
+    } else {
+        setTimeout(preloadCriticalImages, 100);
+        setTimeout(handleMobileOptimizations, 2000);
+    }
+    
+    // Add global error recovery
+    window.addEventListener('online', () => {
+        console.log('Connection restored, retrying failed images');
+        const failedImages = document.querySelectorAll('.lazy-image.error');
+        failedImages.forEach(img => {
+            img.classList.remove('error');
+            img.removeAttribute('data-retry-attempted');
+            if (img.dataset.src) {
+                setTimeout(() => loadImage(img), Math.random() * 2000);
+            }
+        });
+    });
+    
+    // Debug helper for development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        window.retryAllImages = () => {
+            const allImages = document.querySelectorAll('.lazy-image');
+            allImages.forEach(img => {
+                img.classList.remove('loaded', 'error', 'loading');
+                img.removeAttribute('data-retry-attempted');
+                if (img.dataset.src) {
+                    loadImage(img);
+                }
+            });
+        };
+        console.log('🔧 Debug: Use retryAllImages() to retry all gallery images');
+    }
+    
+    console.log('✨ Advanced lazy loading initialized with enhanced error handling');
 }
 
